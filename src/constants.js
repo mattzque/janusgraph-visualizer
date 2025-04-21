@@ -1,10 +1,12 @@
 // Do not place other env vars here. Use settings endpoint in proxy-server.js to get them.
 // process.env is this file is evaluated at build time.
 // https://stackoverflow.com/a/46367006/6619628
-const SERVER_URL = process.env.NODE_ENV == 'production' ? '' : 'http://localhost:3001';
+const SERVER_URL =
+  process.env.NODE_ENV == 'production' ? '' : 'http://localhost:3001';
 export const QUERY_ENDPOINT = `${SERVER_URL}/query`;
 export const SETTINGS_ENDPOINT = `${SERVER_URL}/settings`;
-export const COMMON_GREMLIN_ERROR = 'Invalid query. Please execute a query to get a set of vertices';
+export const COMMON_GREMLIN_ERROR =
+  'Invalid query. Please execute a query to get a set of vertices';
 
 export const ACTIONS = {
   SET_INITIALIZING: 'SET_INITIALIZING',
@@ -28,5 +30,5 @@ export const ACTIONS = {
   EDIT_NODE_LABEL: 'EDIT_NODE_LABEL',
   REMOVE_NODE_LABEL: 'REMOVE_NODE_LABEL',
   REFRESH_NODE_LABELS: 'REFRESH_NODE_LABELS',
-  SET_NODE_LIMIT: 'SET_NODE_LIMIT'
+  SET_NODE_LIMIT: 'SET_NODE_LIMIT',
 };

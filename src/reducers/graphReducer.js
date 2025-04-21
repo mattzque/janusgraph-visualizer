@@ -13,13 +13,19 @@ const initialState = {
   selectedEdge: {},
 };
 
-export const reducer =  (state=initialState, action)=>{
-  switch (action.type){
+export const reducer = (state = initialState, action) => {
+  switch (action.type) {
     case ACTIONS.CLEAR_GRAPH: {
       state.nodeHolder.clear();
       state.edgeHolder.clear();
 
-      return { ...state, nodes: [], edges: [], selectedNode:{}, selectedEdge: {} };
+      return {
+        ...state,
+        nodes: [],
+        edges: [],
+        selectedNode: {},
+        selectedEdge: {},
+      };
     }
     case ACTIONS.SET_NETWORK: {
       return { ...state, network: action.payload };
@@ -53,13 +59,16 @@ export const reducer =  (state=initialState, action)=>{
       return { ...state, selectedEdge, selectedNode: {} };
     }
     case ACTIONS.REFRESH_NODE_LABELS: {
-      const nodeLabelMap =_.mapValues( _.keyBy(action.payload, 'type'), 'field');
-      _.map(state.nodes, node => {
+      const nodeLabelMap = _.mapValues(
+        _.keyBy(action.payload, 'type'),
+        'field'
+      );
+      _.map(state.nodes, (node) => {
         if (node.type in nodeLabelMap) {
           const field = nodeLabelMap[node.type];
           const label = node.properties[field];
-          state.nodeHolder.update({id:node.id, label: label});
-          return {...node, label };
+          state.nodeHolder.update({ id: node.id, label: label });
+          return { ...node, label };
         }
         return node;
       });
