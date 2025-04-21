@@ -9,6 +9,7 @@ export const COMMON_GREMLIN_ERROR =
   'Invalid query. Please execute a query to get a set of vertices';
 
 export const ACTIONS = {
+  SET_THEME: 'SET_THEME',
   SET_INITIALIZING: 'SET_INITIALIZING',
   SET_LOADING: 'SET_LOADING',
   SET_HOST: 'SET_HOST',

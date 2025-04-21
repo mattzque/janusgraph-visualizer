@@ -23,9 +23,23 @@
       }
 
       .mynetwork {
-        width: 100%;
-        height: 100vh;
-        border: 1px solid lightgray;
+
+        /* display: flex; */
+        /* width: 100%;
+        height: 100vh; */
+        /* height: auto; */
+        /* height: 100%; */
+        /* height: 100%; */
+        /* max-height: 100%*/
+        /* overflow: hidden;  */
+      }
+      /* vis-network element is tabindex=0 this removes the outline */
+      .vis-network:focus {
+        outline: none;
+        box-shadow: none;
+      }
+      .vis-network canvas {
+        flex: 1 1 auto;
       }
 
       .details {

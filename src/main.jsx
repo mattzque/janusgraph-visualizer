@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import './index.css';
+// import './index.css';
 import App from './App.jsx';
 
 /// legacy:
@@ -13,7 +13,6 @@ import { Provider } from 'react-redux';
 import { reducer as gremlinReducer } from './reducers/gremlinReducer';
 import { reducer as graphReducer } from './reducers/graphReducer';
 import { reducer as optionReducer } from './reducers/optionReducer';
-// import { App } from './App';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const rootReducer = combineReducers({

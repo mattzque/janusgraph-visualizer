@@ -1,7 +1,20 @@
 import _ from 'lodash';
 import { ACTIONS } from '../constants';
+import { getDefaultTheme } from '@/lib/themeUtils';
 
+const NODE_LABEL_COLOR = {
+  light: '#000',
+  dark: '#fff',
+};
+const EDGE_LABEL_COLOR = {
+  light: '#000',
+  dark: '#fff',
+};
+const defaultTheme = getDefaultTheme();
+
+// https://visjs.github.io/vis-network/docs/network/edges.html
 const initialState = {
+  theme: defaultTheme,
   nodeLabels: [],
   queryHistory: [],
   isPhysicsEnabled: true,
@@ -27,15 +40,28 @@ const initialState = {
     nodes: {
       shape: 'dot',
       size: 20,
-      borderWidth: 2,
+      borderWidth: 1,
       font: {
+        color: NODE_LABEL_COLOR[defaultTheme],
         size: 11,
       },
+      // opacity: 1.0,
+      // color: {},
+      // shadow: {
+      //   enabled: true,
+      //   color: 'rgba(0, 0, 0, 0.5)',
+      //   x: 2,
+      //   y: 2,
+      //   size: 5,
+      //   opacity: 0.2,
+      // },
     },
     edges: {
       width: 2,
       font: {
+        color: EDGE_LABEL_COLOR[defaultTheme],
         size: 11,
+        strokeWidth: 0,
       },
       smooth: {
         type: 'dynamic',
@@ -95,6 +121,30 @@ export const reducer = (state = initialState, action) => {
     case ACTIONS.SET_NODE_LIMIT: {
       const nodeLimit = action.payload;
       return { ...state, nodeLimit };
+    }
+    case ACTIONS.SET_THEME: {
+      const theme = action.payload;
+      return {
+        ...state,
+        theme,
+        networkOptions: {
+          ...state.networkOptions,
+          nodes: {
+            ...state.networkOptions.nodes,
+            font: {
+              ...state.networkOptions.nodes.font,
+              color: NODE_LABEL_COLOR[theme],
+            },
+          },
+          edges: {
+            ...state.networkOptions.edges,
+            font: {
+              ...state.networkOptions.edges.font,
+              color: EDGE_LABEL_COLOR[theme],
+            },
+          },
+        },
+      };
     }
     default:
       return state;

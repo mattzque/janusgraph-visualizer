@@ -48,7 +48,7 @@ export const reducer = (state = initialState, action) => {
       if (nodeId !== null) {
         selectedNode = findNodeById(state.nodes, nodeId);
       }
-      return { ...state, selectedNode, selectedEdge: {} };
+      return { ...state, selectedNode };
     }
     case ACTIONS.SET_SELECTED_EDGE: {
       const edgeId = action.payload;
@@ -56,7 +56,7 @@ export const reducer = (state = initialState, action) => {
       if (edgeId !== null) {
         selectedEdge = findNodeById(state.edges, edgeId);
       }
-      return { ...state, selectedEdge, selectedNode: {} };
+      return { ...state, selectedEdge };
     }
     case ACTIONS.REFRESH_NODE_LABELS: {
       const nodeLabelMap = _.mapValues(

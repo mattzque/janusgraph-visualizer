@@ -1,11 +1,5 @@
 import _ from 'lodash';
 
-const selectRandomField = (obj) => {
-  let firstKey;
-  for (firstKey in obj) break;
-  return firstKey;
-};
-
 export const getDiffNodes = (newList, oldList) => {
   return _.differenceBy(newList, oldList, (node) => node.id);
 };
@@ -23,7 +17,12 @@ export const extractEdgesAndNodes = (nodeList, nodeLabels = []) => {
   _.forEach(nodeList, (node) => {
     const type = node.label;
     if (!nodeLabelMap[type]) {
-      const field = selectRandomField(node.properties);
+      let field;
+      if (node.properties.name) {
+        field = 'name'; // default fallback name or label
+      } else {
+        field = 'label';
+      }
       const nodeLabel = { type, field };
       nodeLabels.push(nodeLabel);
       nodeLabelMap[type] = field;

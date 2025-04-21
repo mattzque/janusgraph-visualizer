@@ -19,18 +19,13 @@ export default function NetworkGraphComponent() {
 
     const network = new Network(networkRef.current, data, networkOptions);
 
-    network.on('selectNode', (params) => {
-      const nodeId =
-        params.nodes && params.nodes.length > 0 ? params.nodes[0] : null;
-      dispatch({ type: ACTIONS.SET_SELECTED_NODE, payload: nodeId });
-    });
-
-    network.on('selectEdge', (params) => {
-      const edgeId =
-        params.edges && params.edges.length === 1 ? params.edges[0] : null;
-      const isNodeSelected = params.nodes && params.nodes.length > 0;
-      if (!isNodeSelected && edgeId !== null) {
-        dispatch({ type: ACTIONS.SET_SELECTED_EDGE, payload: edgeId });
+    network.on('click', (params) => {
+      if (params.nodes.length > 0) {
+        dispatch({ type: ACTIONS.SET_SELECTED_NODE, payload: params.nodes[0] });
+        dispatch({ type: ACTIONS.SET_SELECTED_EDGE, payload: null });
+      } else if (params.edges.length > 0) {
+        dispatch({ type: ACTIONS.SET_SELECTED_EDGE, payload: params.edges[0] });
+        dispatch({ type: ACTIONS.SET_SELECTED_NODE, payload: null });
       }
     });
 
@@ -42,8 +37,5 @@ export default function NetworkGraphComponent() {
     };
   }, [nodeHolder, edgeHolder, networkOptions, dispatch]);
 
-
-
-
-  return <div ref={networkRef} className='mynetwork' />;
+  return <div ref={networkRef} className='flex-1 overflow-hidden' />;
 }
