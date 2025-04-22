@@ -43,9 +43,13 @@ export function QueryForm() {
     });
   }, [dispatch]);
 
+  const [isInitialized, setIsInitalized] = React.useState(false);
+
   useEffect(() => {
-    if (!initializing) {
+    if (!isInitialized && !initializing) {
+      console.log('initial load here', initializing);
       sendQuery();
+      setIsInitalized(true);
     }
   }, [initializing, sendQuery]);
 

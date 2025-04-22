@@ -20,13 +20,14 @@ export default function NetworkGraphComponent() {
     const network = new Network(networkRef.current, data, networkOptions);
 
     network.on('click', (params) => {
-      if (params.nodes.length > 0) {
-        dispatch({ type: ACTIONS.SET_SELECTED_NODE, payload: params.nodes[0] });
-        dispatch({ type: ACTIONS.SET_SELECTED_EDGE, payload: null });
-      } else if (params.edges.length > 0) {
-        dispatch({ type: ACTIONS.SET_SELECTED_EDGE, payload: params.edges[0] });
-        dispatch({ type: ACTIONS.SET_SELECTED_NODE, payload: null });
-      }
+      dispatch({
+        type: ACTIONS.SET_SELECTED_NODE,
+        payload: params.nodes.length > 0 ? params.nodes[0] : null,
+      });
+      dispatch({
+        type: ACTIONS.SET_SELECTED_EDGE,
+        payload: params.edges.length > 0 ? params.edges[0] : null,
+      });
     });
 
     dispatch({ type: ACTIONS.SET_NETWORK, payload: network });

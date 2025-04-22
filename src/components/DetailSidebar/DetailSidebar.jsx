@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AddIcon from '@mui/icons-material/Add';
@@ -24,8 +24,26 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Separator } from '../ui/separator';
-import { Eye } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowLeftRight,
+  ArrowRight,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeftRightEllipsis,
+  ChevronUp,
+  Copy,
+  Eye,
+  MoveLeft,
+  MoveRight,
+  Replace,
+  Shrink,
+  Tag,
+} from 'lucide-react';
 import { Button } from '../ui/button';
+import { useGremlinQuery } from '@/hooks/useGremlinQuery';
+import { ScrollArea } from '../ui/scroll-area';
 
 function formatId(id) {
   if (_.isNumber(id)) {
@@ -40,7 +58,110 @@ function formatId(id) {
   }
 }
 
-function NodeOrEdgeDetail({ type, label, id, properties }) {
+// 'hover:bg-muted/50 data-[state=selected]:bg-muted transition-colors border-0'
+
+function DetailCell({ children, className }) {
+  return (
+    <div
+      className={`px-1 py-3 first:pl-4 last:pr-4 text-xs overflow-hidden text-ellipsis whitespace-nowrap group-hover:bg-muted/50 transition select-none cursor-pointer ${className ?? ''}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DetailCellHeader({ children, className }) {
+  return (
+    <DetailCell
+      className={`text-sidebar-foreground/70 text-left ${className ?? ''}`}
+    >
+      {children}
+    </DetailCell>
+  );
+}
+
+function DetailCellContent({ children, className }) {
+  return <DetailCell className={className}>{children}</DetailCell>;
+}
+
+function DetailCellAction({ children, className }) {
+  return (
+    <DetailCell className={`text-right ${className ?? ''}`}>
+      {children}
+    </DetailCell>
+  );
+}
+
+function DetailRow({ children, onClick }) {
+  return (
+    <div className='contents group' onClick={onClick}>
+      {children}
+    </div>
+  );
+}
+
+function DetailTable({ children }) {
+  return (
+    <div class='grid grid-cols-[minmax(80px,auto)_1fr_auto] auto-rows-min'>
+      {children}
+    </div>
+  );
+}
+
+const DetailPropertyCollapseToggle = ({ isOpen }) => {
+  return (
+    <Button variant='icon' className='h-2 w-2'>
+      {isOpen ? <ChevronUp /> : <ChevronDown />}
+    </Button>
+  );
+};
+
+const DetailPropertyRow = ({ title, value, valueClassName }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleToggle = () => {
+    setIsOpen(!isOpen);
+  };
+
+  return (
+    <>
+      <DetailRow onClick={handleToggle}>
+        <DetailCellHeader className={`${isOpen ? 'bg-muted/50' : ''}`}>
+          {title}
+        </DetailCellHeader>
+        <DetailCellContent
+          className={`${isOpen ? 'bg-muted/50' : ''} ${valueClassName ?? ''}`}
+        >
+          {isOpen ? '' : value}
+        </DetailCellContent>
+        <DetailCellAction className={isOpen ? 'bg-muted/50' : ''}>
+          <DetailPropertyCollapseToggle isOpen={isOpen} />
+        </DetailCellAction>
+      </DetailRow>
+      {isOpen && (
+        <div className={`col-span-3 text-xs px-4 pt-0 pb-4 bg-muted/50`}>
+          <div className={` break-all ${valueClassName}`}>{value}</div>
+
+          <div className='pt-4'>
+            <Button variant='outline'>
+              <Tag /> Show as Caption in Graph
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+// <DetailRow>
+//   <DetailCellHeader>Name 1:</DetailCellHeader>
+//   <DetailCellContent>
+//     Very long value that might overflow
+//   </DetailCellContent>
+//   <DetailCellAction>[Action]</DetailCellAction>
+// </DetailRow>
+
+function NodeOrEdgeDetail({ type, label, id, properties, submitButtonQuery }) {
   const typeLabel = type === 'node' ? 'Node' : 'Edge';
   const idLabel = formatId(id);
 
@@ -50,67 +171,67 @@ function NodeOrEdgeDetail({ type, label, id, properties }) {
         <h1 className='text-xs text-sidebar-foreground/70 p-4'>
           {typeLabel} Details
         </h1>
-        <Table>
-          <TableBody>
-            <TableRow className='border-0'>
-              <TableCell className='text-xs w-[64px] text-sidebar-foreground/70 text-right'>
-                ID
-              </TableCell>
-              <TableCell className='text-xs max-w-4 text-nowrap truncate'>
-                {idLabel}
-              </TableCell>
-              <TableCell className='text-xs text-right'>
-                <Button variant='icon' className='h-3'>
-                  <Eye />
-                </Button>
-              </TableCell>
-            </TableRow>
-            <TableRow className='border-0'>
-              <TableCell className='text-xs w-[64px] text-sidebar-foreground/70 text-right'>
-                Label
-              </TableCell>
-              <TableCell className='text-xs text-nowrap truncate'>
-                {label}
-              </TableCell>
-              <TableCell className='text-xs text-right flex justify-end'>
-                <Button variant='icon' className='h-3'>
-                  <Eye />
-                </Button>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+
+        <DetailTable>
+          <DetailPropertyRow title='ID' value={idLabel} />
+          <DetailPropertyRow title='Label' value={label} />
+        </DetailTable>
+
+        {type === 'node' && (
+          <div className='flex flex-row p-4 gap-4 justify-center'>
+            <Button
+              variant='outline'
+              onClick={() => submitButtonQuery(`g.V('${id}')`, true)}
+            >
+              <Copy />
+            </Button>
+            <Button
+              variant='outline'
+              size='icon'
+              onClick={() => submitButtonQuery(`g.V('${id}').out()`)}
+            >
+              <ChevronRight />
+            </Button>
+            <Button
+              variant='outline'
+              size='icon'
+              onClick={() => submitButtonQuery(`g.V('${id}').in()`)}
+            >
+              <ChevronLeft />
+            </Button>
+            <Button
+              variant='outline'
+              size='icon'
+              onClick={() => submitButtonQuery(`g.V('${id}').both()`)}
+            >
+              <ChevronsLeftRightEllipsis />
+            </Button>
+          </div>
+        )}
       </div>
       <Separator className='mt-4' />
       <div className='flex flex-col'>
         <h1 className='text-xs text-sidebar-foreground/70 p-4'>
           {typeLabel} Properties
         </h1>
-        <Table>
-          <TableBody>
-            {Object.keys(properties).map((key) => (
-              <TableRow className='border-0'>
-                <TableCell className='text-xs w-[64px] text-sidebar-foreground/70 text-right'>
-                  {key}
-                </TableCell>
-                <TableCell className='text-xs max-w-[98px] text-nowrap truncate'>
-                  {properties[key]}
-                </TableCell>
-                <TableCell className='text-xs text-right'>
-                  <Button variant='icon' className='h-3'>
-                    <Eye />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+
+        <DetailTable>
+          {Object.keys(properties).map((key) => (
+            <DetailPropertyRow
+              key={key}
+              title={key}
+              value={properties[key]}
+              valueClassName='font-mono'
+            />
+          ))}
+        </DetailTable>
       </div>
     </div>
   );
 }
 
 export default function DetailSidebar() {
+  const { sendQuery, cancelQuery } = useGremlinQuery();
   const dispatch = useDispatch();
   const {
     host,
@@ -136,6 +257,31 @@ export default function DetailSidebar() {
     isPhysicsEnabled: state.options.isPhysicsEnabled,
   }));
 
+  const submitButtonQuery = (query, setAndRunQuery = false) => {
+    if (setAndRunQuery) {
+      dispatch({ type: ACTIONS.CLEAR_GRAPH });
+      dispatch({ type: ACTIONS.CLEAR_QUERY_HISTORY });
+      dispatch({ type: ACTIONS.SET_QUERY, payload: query });
+      // setTimeout(() => {
+      //   sendQuery();
+      // }, 3);
+    } else {
+      axios
+        .post(
+          QUERY_ENDPOINT,
+          { host, port, query, nodeLimit, traversalSource },
+          { headers: { 'Content-Type': 'application/json' } }
+        )
+        .then((response) => {
+          onFetchQuery(response, query, nodeLabels, dispatch);
+        })
+        .catch(() => {
+          dispatch({ type: ACTIONS.SET_ERROR, payload: COMMON_GREMLIN_ERROR });
+        });
+    }
+  };
+
+  // const query = `g.V('${nodeId}').${direction}()`;
   // TODO/WIP clunky
 
   const selected = useMemo(() => {
@@ -149,7 +295,7 @@ export default function DetailSidebar() {
     }
     if (element) {
       return {
-        type: 'edge',
+        type,
         label: _.get(element, 'type'),
         id: _.get(element, 'id'),
         properties: _.get(element, 'properties'),
@@ -158,13 +304,26 @@ export default function DetailSidebar() {
     return null;
   }, [selectedNode, selectedEdge]);
 
+  console.log(selectedNode, selectedEdge);
+
   if (selected) {
     return (
       <div className='flex w-full'>
-        <NodeOrEdgeDetail {...selected} />
+        <ScrollArea className='w-full'>
+          <NodeOrEdgeDetail
+            submitButtonQuery={submitButtonQuery}
+            {...selected}
+          />
+        </ScrollArea>
       </div>
     );
   } else {
-    return null;
+    return (
+      <div className='flex w-full p-4 justify-center'>
+        <span className='text-xs text-sidebar-foreground/70'>
+          Select node or edge to view details.
+        </span>
+      </div>
+    );
   }
 }

@@ -3,11 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-
-
-
-
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -124,4 +119,14 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* vis-network element is tabindex=0 this removes the outline */
+.vis-network:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.vis-network canvas {
+  flex: 1 1 auto;
 }
