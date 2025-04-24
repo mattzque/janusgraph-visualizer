@@ -86,7 +86,7 @@ function DetailCellContent({ children, className }) {
 
 function DetailCellAction({ children, className }) {
   return (
-    <DetailCell className={`text-right ${className ?? ''}`}>
+    <DetailCell className={`text-right justify-end flex ${className ?? ''}`}>
       {children}
     </DetailCell>
   );
@@ -116,7 +116,7 @@ const DetailPropertyCollapseToggle = ({ isOpen }) => {
   );
 };
 
-const DetailPropertyRow = ({ title, value, valueClassName }) => {
+const DetailPropertyRow = ({ title, value, valueClassName, isNodeCaption }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleToggle = () => {
@@ -135,18 +135,26 @@ const DetailPropertyRow = ({ title, value, valueClassName }) => {
           {isOpen ? '' : value}
         </DetailCellContent>
         <DetailCellAction className={isOpen ? 'bg-muted/50' : ''}>
+          {isNodeCaption && (
+            <div className='flex flex-col h-4 w-3 mr-2 items-center justify-center'>
+              <Tag className='h-3 w-4' />
+            </div>
+          )}
+
           <DetailPropertyCollapseToggle isOpen={isOpen} />
         </DetailCellAction>
       </DetailRow>
       {isOpen && (
         <div className={`col-span-3 text-xs px-4 pt-0 pb-4 bg-muted/50`}>
-          <div className={` break-all ${valueClassName}`}>{value}</div>
+          <div className={` break-word ${valueClassName}`}>{value}</div>
 
-          <div className='pt-4'>
-            <Button variant='outline'>
-              <Tag /> Show as Caption in Graph
-            </Button>
-          </div>
+          {!isNodeCaption && (
+            <div className='pt-4'>
+              <Button variant='outline'>
+                <Tag /> Use Caption
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </>
@@ -161,9 +169,18 @@ const DetailPropertyRow = ({ title, value, valueClassName }) => {
 //   <DetailCellAction>[Action]</DetailCellAction>
 // </DetailRow>
 
-function NodeOrEdgeDetail({ type, label, id, properties, submitButtonQuery }) {
+function NodeOrEdgeDetail({
+  type,
+  label,
+  id,
+  properties,
+  graphCaption,
+  submitButtonQuery,
+}) {
   const typeLabel = type === 'node' ? 'Node' : 'Edge';
   const idLabel = formatId(id);
+
+  console.log('graphCaption', graphCaption);
 
   return (
     <div className='w-full flex flex-col'>
@@ -222,6 +239,7 @@ function NodeOrEdgeDetail({ type, label, id, properties, submitButtonQuery }) {
               title={key}
               value={properties[key]}
               valueClassName='font-mono'
+              isNodeCaption={graphCaption && graphCaption.field === key}
             />
           ))}
         </DetailTable>
@@ -257,6 +275,10 @@ export default function DetailSidebar() {
     isPhysicsEnabled: state.options.isPhysicsEnabled,
   }));
 
+  console.log('nodeLabels', nodeLabels);
+  // onRefresh
+  // onAddNodeLabel
+
   const submitButtonQuery = (query, setAndRunQuery = false) => {
     if (setAndRunQuery) {
       dispatch({ type: ACTIONS.CLEAR_GRAPH });
@@ -286,6 +308,7 @@ export default function DetailSidebar() {
 
   const selected = useMemo(() => {
     let type, element;
+
     if (!_.isEmpty(selectedNode)) {
       type = 'node';
       element = selectedNode;
@@ -294,15 +317,19 @@ export default function DetailSidebar() {
       element = selectedEdge;
     }
     if (element) {
+      const label = _.get(element, 'type');
+      const graphCaption = nodeLabels.find(({ type, field }) => type === label);
+
       return {
         type,
         label: _.get(element, 'type'),
         id: _.get(element, 'id'),
         properties: _.get(element, 'properties'),
+        graphCaption,
       };
     }
     return null;
-  }, [selectedNode, selectedEdge]);
+  }, [selectedNode, selectedEdge, nodeLabels]);
 
   console.log(selectedNode, selectedEdge);
 

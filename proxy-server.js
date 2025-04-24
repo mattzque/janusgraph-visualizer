@@ -74,7 +74,7 @@ function makeQuery(query, nodeLimit) {
 app.post('/query', (req, res, next) => {
   const gremlinHost = req.body.host;
   const gremlinPort = req.body.port;
-  const nodeLimit = req.body.nodeLimit;
+  const nodeLimit = 50000; //  req.body.nodeLimit;
   const query = req.body.query;
   const traversalSource = req.body.traversalSource;
 
